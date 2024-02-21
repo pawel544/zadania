@@ -1,0 +1,118 @@
+import os
+import shutil
+from pathlib import Path
+from threading import Thread
+
+obrazy = ['.jpeg', '.png', '.jpg', '.SVG']
+wideo = [".AVI", ".MP4", ".MOV", ".MKV"]
+dokumenty = [".DOC", ".DOCX", ".TXT", ".PDF", ".XLSX", ".PPTX"]
+muzyka = ['.MP3', '.OGG', '.WAV', '.AMR']
+archiwa = ['.ZIP', '.GZ', '.TAR']
+
+def normalize(name):
+    new_name = name.replace('ą', 'a').replace('ę', 'e').replace('ż', 'z')
+    new_name = new_name.replace('Ą', 'A').replace('Ę', 'E').replace('Ż', 'Z')
+    return ''.join(c if c.isalnum() or c.isspace() else '_' for c in new_name)
+
+def remove_empty_folders_recursive(path):
+    for root, dirs, files in os.walk(path, topdown=False):
+        for dir in dirs:
+            full_path = os.path.join(root, dir)
+            try:
+                if not os.listdir(full_path):
+                    os.rmdir(full_path)
+                    print(f"Usunięto pusty folder: {full_path}")
+            except OSError:
+                pass
+
+class MyThread(Thread):
+    def __init__(self, folder):
+        Thread().__init__()
+        self.folder=folder
+    def run(self):
+        for root, dirs, files in os.walk(self.folder):
+            for file in files:
+                current_file = Path(root, file)
+                file_extension = current_file.suffix.lower()
+                if file_extension in [arch.lower() for arch in archiwa]:
+                    target_folder = Path(self.folder, "Archiwa", current_file.stem)
+                    os.makedirs(target_folder, exist_ok=True)
+                try:
+                    shutil.unpack_archive(str(current_file), str(target_folder))
+                    print(f"Rozpakowywanie archiwum {current_file} zakończone powodzeniem :)")
+                except Exception as e:
+                    print(f"Rozpakowywanie pliku {current_file} nieudane. Ponów uruchomienie programu: {e}")
+
+def organize_files(folder, discornet):
+    for root, dirs, files in os.walk(folder):
+        for file in files:
+            file_path = Path(root, file)
+            file_name, file_extension = file_path.stem, file_path.suffix
+            normalized_name = normalize(file_name)
+
+            if not os.path.exists(file_path):
+                continue
+
+            for category, extensions in discornet.items():
+                if file_extension.lower() in map(str.lower, extensions):
+                    target_directory = Path(folder, category)
+                    normalized_file_name = f"{normalized_name}{file_extension}"
+                    target_path = Path(target_directory, normalized_file_name)
+                    os.makedirs(target_directory, exist_ok=True)
+
+                    try:
+                        shutil.move(file_path, target_path)
+                        print(f"Przenoszenie pliku {file_path} zakończone powodzeniem")
+                    except shutil.Error as e:
+                        print(f"Nie udało się przenieść pliku {file_path}: {e}")
+                    break
+            else:
+                target_directory = Path(folder, "Inne")
+                normalized_file_name = f"{normalized_name}{file_extension}"
+                target_path = Path(target_directory, normalized_file_name)
+                os.makedirs(target_directory, exist_ok=True)
+
+                try:
+                    shutil.move(file_path, target_path)
+                    print(f"Przenoszenie pliku {file_path} zakończone powodzeniem")
+                except shutil.Error as e:
+                    print(f"Nie udało się przenieść pliku {file_path}: {e}")
+
+        for podfolder in dirs:
+            nowa_sciezka = os.path.join(folder, podfolder)
+            if os.path.exists(nowa_sciezka) and not os.listdir(nowa_sciezka):
+                organize_files(nowa_sciezka, discornet)
+                print(f"Usuwanie pustego folderu: {nowa_sciezka}")
+                os.rmdir(nowa_sciezka)
+
+    remove_empty_folders_recursive(folder)
+    rozpakowywacz(folder)
+
+def main():
+    import sys
+
+    if len(sys.argv) != 2:
+        print("Niewłaściwa liczba argumentów. Podaj poprawną ścieżkę.")
+    else:
+        folder_to_organize = sys.argv[1]
+        discornet = {
+            "Obrazy": obrazy,
+            "Wideo": wideo,
+            "Dokumenty": dokumenty,
+            "Muzyka": muzyka,
+            "Archiwa": archiwa,
+            "Inne": []
+        }
+        thread1 = MyThread(folder_to_organize, discornet)
+        thread2 = MyThread(folder_to_organize, discornet)
+        thread1.start()
+        thread2.start()
+        thread1.join()
+        thread2.join()
+        organize_files(folder_to_organize, discornet)
+        print("Sortowanie, organizacja i rozpakowywanie zakończone.")
+
+if __name__ == '__main__':
+    main()
+
+
