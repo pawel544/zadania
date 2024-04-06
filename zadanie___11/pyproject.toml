@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "zad11"
+version = "1"
+description = ""
+authors = ["skip"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.2"
+fastapi = "^0.110.1"
+uvicorn = {extras = ["standard"], version = "^0.29.0"}
+sqlalchemy = "^2.0.29"
+psycopg2 = "^2.9.9"
+alembic = "^1.13.1"
+psycopg2-binary = "^2.9.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
