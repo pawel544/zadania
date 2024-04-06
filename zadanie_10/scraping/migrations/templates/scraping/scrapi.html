@@ -1,0 +1,24 @@
+{% extends "strona/base.html"%}
+{% block content %}
+<form method="POST" action="{% url 'strona:author' %}">
+{% csrf_token %}
+<div style="width: 80%; margin auto;">
+    <div style="padding: 10px">
+        <label> Enter author name
+            {{form.name}}
+        </label>
+        <span>{{orm.errors.name}}</span>
+    </div>
+    <div style="padding: 10px">
+
+
+
+
+<div class="gird">
+    <button type="submit">Submit</button>
+    <button type="reset">Reset</button>
+
+</div>
+</div>
+</form>
+{% endblock %}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Organizer</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css"/>
+</head>
+<body>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<main class="container"><h1>Strona Główna</h1>
+
+    <nav style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 30px">
+
+    <ul>
+
+        {% if user.is_authenticated %}
+        <li><a href="user/logaut/" roole="button">wyloguj</a></li>
+        <li><a href="author/" roole="button">Dodaj autora albo cytat</a></li>>
+        <form action="{% url 'scrape_and_save' %}" method="post">
+            <button>href='/' roole="submit">Scrapuj</button></form>
+        {% else %}
+        <li><a href='user/login/' roole="button"> LOGIN</a></li>
+        <li><a href='user/signup/' roole="button">REGISTRATION</a></li>
+        {% endif %}
+    </ul>
+    </nav>
+
+</main>
+
+<ul>
+    {% for author in author %}
+        <li> Autor: {{ author.name }} </li>
+        <ul>
+            {% for quate in author.quates.all %}
+                <li>Cytat: "{{ quate.form_quate }}"</li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+</ul>
+
+</body>
+</html>
+
+
