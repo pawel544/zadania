@@ -2,7 +2,9 @@
 {% block content %}
 <form method="POST" action="{% url 'strona:author' %}">
 {% csrf_token %}
-<div style="width: 80%; margin auto;">
+
+
+    <div style="width: 80%; margin auto;">
     <div style="padding: 10px">
         <label> Enter author name
             {{form.name}}

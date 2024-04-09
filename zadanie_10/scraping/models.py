@@ -2,10 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
 class Author(models.Model):
-    name = models.CharField(max_length=100)
+    names = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.name
+        return f"{self.names}"
 
 class Quote(models.Model):
     text = models.TextField()
@@ -13,4 +13,4 @@ class Quote(models.Model):
 
 
     def __str__(self):
-        return self.text
+        return f"{self.text}"

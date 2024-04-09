@@ -12,12 +12,16 @@
     <nav style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 30px">
 
     <ul>
+        <form action="{% url 'zadanie_10/scraping/views.py/scrap_and_fill_database' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Scrapuj dane</button>
+</form>
+
 
         {% if user.is_authenticated %}
         <li><a href="user/logaut/" roole="button">wyloguj</a></li>
-        <li><a href="author/" roole="button">Dodaj autora albo cytat</a></li>>
-        <form action="{% url 'scrape_and_save' %}" method="post">
-            <button>href='/' roole="submit">Scrapuj</button></form>
+        <li><a href="author/" roole="button">Dodaj autora albo cytat</a></li>
+
         {% else %}
         <li><a href='user/login/' roole="button"> LOGIN</a></li>
         <li><a href='user/signup/' roole="button">REGISTRATION</a></li>
@@ -32,9 +36,14 @@
         <li> Autor: {{ author.name }} </li>
         <ul>
             {% for quate in author.quates.all %}
-                <li>Cytat: "{{ quate.form_quate }}"</li>
-            {% endfor %}
+            <li> Cytat: {{ quate.form_quate  }}</li>
+
+
+
         </ul>
+
+            {% endfor %}
+
     {% endfor %}
 </ul>
 
