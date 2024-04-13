@@ -34,15 +34,11 @@ def scrap_and_fill_database():
                 author_url = f'{url}/author/{normalized_name}/'
                 response_author = requests.get(author_url)
                 soup_author = BeautifulSoup(response_author.text, 'lxml')
-                born_date = soup_author.find('span', class_='author-born-date').text.strip()
                 description = soup_author.find('span', class_='author-description').text.strip()
-                authors_list.append({
-                    "fullname": name,
-                    "born_date": born_date,
-                    "description": description
-                })
+                soup_author.save()
+                description.save()
             page_number += 1
-            return authors_list.save()
+            return redirect(to='strona:main')
     else:
 
         print('Błąd: Nie udało się pobrać strony')
