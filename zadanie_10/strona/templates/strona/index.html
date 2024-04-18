@@ -12,9 +12,10 @@
     <nav style="margin-bottom: 20px; border-bottom: 2px solid; padding-left: 30px">
 
     <ul>
-        <form action="{% url 'zadanie_10/scraping/views.py/scrap_and_fill_database' %}" method="post">
-    {% csrf_token %}
-    <button type="submit">Scrapuj dane</button>
+<form action="{% url 'scraping:scrap_and_fill_database' %}" method="post">
+{% csrf_token %}
+
+<input type="submit" value="skrapuj">
 </form>
 
 
@@ -45,6 +46,24 @@
             {% endfor %}
 
     {% endfor %}
+    <li>
+    {% for author in author %}
+        <li> Autor: {{ author.name }} </li>
+        <ul>
+            {% for quate in author.quates.all %}
+            <li> Cytat: {{ quate.form_quate  }}</li>
+
+
+
+
+            {% endfor %}
+
+    {% endfor %}
+        </ul>
+</ul>
+    </li>
+</body>
+</html>
 </ul>
 
 </body>

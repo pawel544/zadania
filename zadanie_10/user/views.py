@@ -1,48 +1,47 @@
-from django.shortcuts import render
-from bs4 import BeautifulSoup
-import requests
-from .models import Quote, Author
+from django.shortcuts import render, redirect
+from .forms import RegistrateForm, LoginForm
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+
 # Create your views here.
-def normalizer(text):
-    normalized_text = text.replace(" ", "-").replace(".", "").replace("'", "").replace("é", "e")
-    return normalized_text
 
-
-
-
-def scrap_and_fill_database():
-
-    url = 'http://quotes.toscrape.com'
-
-
-    response = requests.get(url)
-
-
-    if response.status_code == 200:
-
-        authors_list = []
-        page_number = 1
-        while True:
-            response = requests.get(f"{url}/page/{page_number}")
-            soup = BeautifulSoup(response.text, "lxml")
-            authors = soup.find_all("small", class_='author')
-            if not authors:
-                break
-            for author in authors:
-                name = author.text
-                normalized_name = normalizer(name)
-                author_url = f'{url}/author/{normalized_name}/'
-                response_author = requests.get(author_url)
-                soup_author = BeautifulSoup(response_author.text, 'lxml')
-                description = soup_author.find('span', class_='author-description').text.strip()
-                soup_author.save()
-                description.save()
-            page_number += 1
+def signupuser(request):
+    if request.user.is_authenticated:
+        return redirect(to='strona:main')
+    if request.method=='POST':
+        form= RegistrateForm(request.POST)
+        if form.is_valid():
+            form.save()
             return redirect(to='strona:main')
-    else:
+        else:
+            return render(request, 'user/signup.html', context={'form':form})
+    return render(request, 'user/signup.html', context={'form':RegistrateForm()})
 
-        print('Błąd: Nie udało się pobrać strony')
+def loginuser(request):
+    if request.user.is_authenticated:
+        return redirect( to='strona:main')
+    if request.method=='POST':
+        user=authenticate( username= request.POST['username'], password=request.POST['password'])
+        if user is None:
+            messages.error(request, 'Username or password didn\'t match')
+            return redirect("user:login")
+        login(request, user)
+        return redirect(to='strona:main')
+    return render(request,'user/login.html', context={'form':LoginForm()})
+@login_required
+def logautuser(request):
+    logout(request)
+    return redirect(to='strona:main')
 
-
-
-
+class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
+    template_name = 'users/password_reset.html'
+    email_template_name = 'users/password_reset_email.html'
+    html_email_template_name = 'users/password_reset_email.html'
+    success_url = reverse_lazy('users:password_reset_done')
+    success_message = "An email with instructions to reset your password has been sent to %(email)s."
+    subject_template_name = 'users/password_reset_subject.txt'

@@ -8,6 +8,11 @@ class RegistrateForm(UserCreationForm):
                               required=True,
                               widget=forms.TextInput())
 
+    email= forms.CharField(min_length=5,
+                           max_length=20,
+                           required=True,
+                           widget=forms.TextInput())
+
     password1 = forms.CharField(min_length=3,
                                 max_length=20,
                                 required=True,
