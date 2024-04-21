@@ -13,11 +13,21 @@ from zad11.database.models import User
 
 
 class Hash:
+    """A class for password management, including hashing and verification"""
     pdw_context= CryptContext(schemes=['bcrypto'], deprecated='auto')
     def verefict_password(self, plain_pasword, hashed_pasword):
+        """ Verify that the provided password in explicit form matches the hash.
+
+        :p aram plain_password: Explicit password
+        :p aram hashed_password: Hashed Password
+        :return: Whether the passwords match (True/False)"""
         return self.pdw_context.verifi(plain_pasword,hashed_pasword)
 
     def get_password(self, password:str):
+        """Hashing the password provided.
+
+        :p aram password: Password to hash
+        :return: Hashed password"""
         return self.pdw_context.hash(password)
 
 secrets_keys="secrets_keys"
@@ -26,6 +36,12 @@ Token_Verif=timedelta(hours=1)
 out2=OAuth2PasswordBearer(tokenURL="/")
 
 async def create_access_token(data: dict, experice: Optional[float]=None):
+    """Creates a JWT access token with a specified expiration date.
+
+    :p aram data: Data to encode in the token
+    :p aram experice: Optional expiration time in seconds
+    :return: Encoded JWT token"""
+
     to_encoder=data.copy()
     if experice:
         exper= datetime.utcnow()+timedelta(seconds=experice)
@@ -36,6 +52,11 @@ async def create_access_token(data: dict, experice: Optional[float]=None):
         return encode_access_token
 
 async def create_refreshe_token(data:dict, experice: Optional[float]=None):
+    """Creates a JWT refresh token with the specified expiration date.
+
+    :p aram data: Data to encode in the token
+    :p aram experice: Optional expiration time in seconds
+    :return: Encoded JWT token"""
     to_encoder=data.copy()
     if experice:
         exper= datetime.utcnow()+timedelta(seconds=experice)
@@ -46,6 +67,10 @@ async def create_refreshe_token(data:dict, experice: Optional[float]=None):
         return encode_refreshe_token
 
 async def get_email_refreshe_token(refreshe_token: str):
+    """ Retrieves the email from the JWT refresh token.
+
+    :p aram refreshe_token: Refresh token
+    :return: Email included in the token or exception in case of error"""
     try:
         payloyd= jwt.decode(refreshe_token,secrets_keys, algoritmh=[ALGORYTM])
         if payload["scope"]==refreshe_token:
@@ -56,6 +81,10 @@ async def get_email_refreshe_token(refreshe_token: str):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate credentials')
 
 async def verif_token(username:str):
+    """Creates a JWT token for a given user with a specified expiration date.
+
+    :p aram username: Username
+    :return: Encoded JWT token"""
     data_verif= datetime.utcnow()+Token_Verif
     payloyd={"sub": User, "exp": data_verif}
     token= jwt.encode(payloyd,secrets_keys,algorithm='HS256')
@@ -64,6 +93,11 @@ async def verif_token(username:str):
 
 
 async def get_usser(token: str=Depends(out2), db: Session= Depends(get_db)):
+    """ Retrieves the user from the JWT token.
+
+    :p aram token: JWT Token
+    :p aram db: Database session
+    :return: User or exception in case of error"""
     cr_exception=HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials",
                                headers={"WWW-Authenticate":"Bearer"})
     try:
